@@ -1,22 +1,14 @@
-import { Template } from 'meteor/templating';
-import { ReactiveVar } from 'meteor/reactive-var';
+    Session.set("points", []);
+    console.log("I'm running client code");
 
-import './main.html';
-
-Template.hello.onCreated(function helloOnCreated() {
-  // counter starts at 0
-  this.counter = new ReactiveVar(0);
-});
-
-Template.hello.helpers({
-  counter() {
-    return Template.instance().counter.get();
-  },
-});
-
-Template.hello.events({
-  'click button'(event, instance) {
-    // increment the counter when button is clicked
-    instance.counter.set(instance.counter.get() + 1);
-  },
-});
+    Template.mapSVG.onRendered(() => {
+        
+        d3.xml("victoriaMap.svg", function(error, xml) {
+            if (error) throw error;
+            // console.log(xml);
+            // "xml" is the XML DOM tree
+            var htmlSVG = document.getElementById('map'); // the svg-element in our HTML file
+            // append the "maproot" group to the svg-element in our HTML file
+            htmlSVG.appendChild(xml.documentElement);
+        });
+    });

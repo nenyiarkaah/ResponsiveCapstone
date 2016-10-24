@@ -1,25 +1,16 @@
 <head>
-  <title>simple</title>
+  <title>An example of using D3.js in Meteor</title>
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
-
-  {{> hello}}
-  {{> info}}
+  <h1>D3 example on a Meteor App</h1>
+  {{> mapSVG}}
 </body>
 
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
-</template>
-
-<template name="info">
-  <h2>Learn Meteor!</h2>
-  <ul>
-    <li><a href="https://www.meteor.com/try">Do the Tutorial</a></li>
-    <li><a href="http://guide.meteor.com">Follow the Guide</a></li>
-    <li><a href="https://docs.meteor.com">Read the Docs</a></li>
-    <li><a href="https://forums.meteor.com">Discussions</a></li>
-  </ul>
+<template name="mapSVG">
+  <div id="main">
+  <div id="map_container">
+    <svg id="map" width="100%"></svg>
+  </div>
+</div>
 </template>
