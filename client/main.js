@@ -16,7 +16,6 @@ Template.mapSVG.onRendered(() => {
         var transformRatio = calculateTransformRatio($("svg").parent().width(),
             $("svg").parent().height(), svg.select("svg").attr("width"),
             svg.select("svg").attr("height"));
-        // console.log(transformRatio);
         svg.select("svg")
             //responsive SVG needs these 2 attributes and no width and height attr
             .attr("preserveAspectRatio", "xMinYMin meet")
@@ -29,41 +28,61 @@ Template.mapSVG.onRendered(() => {
 
         //add click functionality
         stops = svg.selectAll("use");
-        stopNames = svg.selectAll("text");
+        stopNames = svg.selectAll("text")
+            .attr("test", function() {
+                return stripSpaces(this.textContent)
+            });
+
         intersection = svg.selectAll("intersection");
 
         stops
-        .on("mouseover", function(){
-            if(isStation(this.href.baseVal)){
-            // console.log(this.id);
-            d3.select(this).style("fill", "#FFA500");
-        }
+            .on("mouseover", function() {
+                if (isStation(this.href.baseVal)) {
+
+                    name = stripSpaces(this.id);
+                    // highlight station name
+                    stationName = stopNames.select(function() {
+                            if (d3.select(this).attr("test") == name) {
+                                return this;
+                            }
+                        })
+                        .filter(function(d) {
+                            return d == null;
+                        });
+                    stationName.style("fill", "#FFA500");
+                }
+            })
+
+        .on("mouseout", function() {
+            if (isStation(this.href.baseVal)) {
+
+                name = stripSpaces(this.id);
+                // highlight station name
+                stationName = stopNames.select(function() {
+                    if (d3.select(this).attr("test") == name) {
+                        return this;
+                    }
+                }).filter(function(d) {
+                    return d == null;
+                });
+                stationName.style("fill", "#000000");
+            }
         })
 
-        .on("mouseout", function(){
-            if(isStation(this.href.baseVal)){
-            // console.log(this.id);
-            d3.select(this).style("fill", "#ffffff");
-        }
-        })
-
-        .on("click", function(){
-            if(isStation(this.href.baseVal)){
-            console.log(this.id);
-            d3.select(this).style("fill", "808080");
-        }
+        .on("click", function() {
+            if (isStation(this.href.baseVal)) {
+                d3.select(this).style("fill", "808080");
+            }
         });
 
         stopNames
-        .on("mouseover", function(){
+            .on("mouseover", function() {
+                name = stripSpaces(this.textContent);
+                d3.select(this).style("fill", "#FFA500");
+            })
 
-            console.log(this.textContent);
-            d3.select(this).style("fill", "#FFA500");
-        })
-
-        .on("mouseout", function(){
-            // console.log(this.id);
-            d3.select(this).style("fill", "black");
+        .on("mouseout", function() {
+            d3.select(this).style("fill", "#000000");
         });
         //
         // .on("click", function(){
@@ -73,15 +92,16 @@ Template.mapSVG.onRendered(() => {
         // });
         // .on("mouseout", function(){d3.select(this).style("fill", "808080");});
 
-        intersection
-        .on("mouseover", function(){
-            console.log("hit intersection");
-            d3.select(this).style("fill", "#FFA500");
-        })
-
-        .on("mouseout", function(){
-            d3.select(this).style("fill", "#ffffff");
-        });
+        // intersection
+        // .on("mouseover", function(){
+        //
+        //     console.log("hit intersection");
+        //     d3.select(this).style("fill", "#FFA500");
+        // })
+        //
+        // .on("mouseout", function(){
+        //     d3.select(this).style("fill", "#ffffff");
+        // });
         //
         // .on("click", function(){
         //     if(isStation(this.href.baseVal))
@@ -90,11 +110,15 @@ Template.mapSVG.onRendered(() => {
         // });
         // .on("mouseout", function(){d3.select(this).style("fill", "808080");});
         // console.log(stops);
-        console.log(intersection);
+        // console.log(intersection);
     });
 
+    function stripSpaces(str) {
+        return str.replace(/\s+/g, '');
+    }
+
     function isStation(type) {
-        if(type.replace("#", "") === "intersection") {
+        if (type.replace("#", "") === "intersection") {
             return true;
         }
         return false;
@@ -111,4 +135,7 @@ Template.mapSVG.onRendered(() => {
         }
         return ratio;
     }
+
+
+
 });
