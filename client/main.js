@@ -2,7 +2,7 @@
 console.log("I'm running client code");
 
 Template.mapSVG.onRendered(() => {
-
+    // console.log(Stations);
     d3.xml("victoriaMap.svg", function(error, xml) {
         if (error) throw error;
         // "xml" is the XML DOM tree
@@ -50,6 +50,7 @@ Template.mapSVG.onRendered(() => {
                             return d == null;
                         });
                     stationName.style("fill", "#FFA500");
+                    // console.log(findTFLId(name));
                 }
             })
 
@@ -71,7 +72,8 @@ Template.mapSVG.onRendered(() => {
 
         .on("click", function() {
             if (isStation(this.href.baseVal)) {
-                d3.select(this).style("fill", "808080");
+                name = stripSpaces(this.id);
+                console.log(findTFLId(name));
             }
         });
 
@@ -79,17 +81,17 @@ Template.mapSVG.onRendered(() => {
             .on("mouseover", function() {
                 name = stripSpaces(this.textContent);
                 d3.select(this).style("fill", "#FFA500");
+                // console.log(findTFLId(name));
             })
 
         .on("mouseout", function() {
             d3.select(this).style("fill", "#000000");
+        })
+
+        .on("click", function(){
+            name = stripSpaces(this.textContent);
+            console.log(findTFLId(name));
         });
-        //
-        // .on("click", function(){
-        //     if(isStation(this.href.baseVal))
-        //     console.log(this.id);
-        //     d3.select(this).style("fill", "808080");
-        // });
         // .on("mouseout", function(){d3.select(this).style("fill", "808080");});
 
         // intersection
@@ -134,6 +136,10 @@ Template.mapSVG.onRendered(() => {
             ratio = widthRatio;
         }
         return ratio;
+    }
+
+    function findTFLId(name){
+        return Stations.findOne({internalName:name});
     }
 
 
