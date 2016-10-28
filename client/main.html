@@ -4,7 +4,12 @@
 
 <body>
   <h1>Victoria Line Information Map</h1>
-  {{> mapSVG}}
+  <div class="container">
+    {{> details}}
+    {{> mapSVG}}
+  </div>
+
+
 </body>
 
 <template name="mapSVG">
@@ -13,4 +18,13 @@
     <svg id="map" width="100%"></svg>
   </div>
 </div>
+</template>
+
+<template name="details">
+  <div id="details">
+    <p>
+      Station :- {{name}}
+    </p>
+  </div>
+
 </template>

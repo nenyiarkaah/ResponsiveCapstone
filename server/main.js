@@ -10,12 +10,14 @@ Meteor.startup(() => {
     Stations.remove({});
     if (Stations.find().count() === 0) {
         data.forEach(function(item) {
-            Stations.insert({
-                tflId: item.naptanId,
-                name: item.commonName,
-                internalName: convertCommonNameToInternal(item.commonName)
-            });
-            console.log(item.naptanId);
+            var strItem = JSON.stringify(item);
+            while (strItem.includes("$")) {
+                strItem = strItem.replace("$", "base");
+            }
+            item = JSON.parse(strItem);
+            id = Stations.insert(item);
+            Stations.update({_id:id}, {$set: {internalName: convertCommonNameToInternal(item.commonName)}})
+            console.log(id);
         });
     }
 

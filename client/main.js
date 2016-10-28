@@ -50,7 +50,6 @@ Template.mapSVG.onRendered(() => {
                             return d == null;
                         });
                     stationName.style("fill", "#FFA500");
-                    // console.log(findTFLId(name));
                 }
             })
 
@@ -88,31 +87,12 @@ Template.mapSVG.onRendered(() => {
             d3.select(this).style("fill", "#000000");
         })
 
-        .on("click", function(){
+        .on("click", function() {
             name = stripSpaces(this.textContent);
-            console.log(findTFLId(name));
+            var stop = findTFLId(name);
+            console.log("id:" + stop.id);
+            getInboundArrivals("victoria", stop.id);
         });
-        // .on("mouseout", function(){d3.select(this).style("fill", "808080");});
-
-        // intersection
-        // .on("mouseover", function(){
-        //
-        //     console.log("hit intersection");
-        //     d3.select(this).style("fill", "#FFA500");
-        // })
-        //
-        // .on("mouseout", function(){
-        //     d3.select(this).style("fill", "#ffffff");
-        // });
-        //
-        // .on("click", function(){
-        //     if(isStation(this.href.baseVal))
-        //     console.log(this.id);
-        //     d3.select(this).style("fill", "808080");
-        // });
-        // .on("mouseout", function(){d3.select(this).style("fill", "808080");});
-        // console.log(stops);
-        // console.log(intersection);
     });
 
     function stripSpaces(str) {
@@ -138,10 +118,47 @@ Template.mapSVG.onRendered(() => {
         return ratio;
     }
 
-    function findTFLId(name){
-        return Stations.findOne({internalName:name});
+    function findTFLId(name) {
+        return Stations.findOne({
+            internalName: name
+        });
     }
 
+    function getInboundArrivals(line, tflId) {
+        urlAPI = "https://api.tfl.gov.uk/Line/" + line + "/Arrivals/" + tflId + "?direction=inbound&app_id=&app_key=";
 
+        Meteor.http.get(urlAPI, function(error, results) {
+
+            if (!error) {
+                var strResult = JSON.stringify(results.data);
+                while (strResult.includes("$")) {
+                    strResult = strResult.replace("$", "base");
+                }
+                var data = JSON.parse(strResult);
+                data.forEach(function(item) {
+
+                    id = Arrivals.insert(item);
+                });
+                console.log(Arrivals.find().map(function(doc) {
+                    return moment().utc(doc.expectedArrival).format('HH:mm:ss') || []
+                }));
+                console.log(Arrivals.find().map(function(doc) {
+                    return moment().add(doc.timeToStation, 'seconds').fromNow() || []
+                }));
+                //                     return doc.expectedArrival, doc.timeToStation|| []}));
+            } else {
+                console.log(error);
+            }
+        });
+
+    }
+
+});
+
+Template.mapSVG.helpers({
+
+});
+
+Template.details.helpers({
 
 });
