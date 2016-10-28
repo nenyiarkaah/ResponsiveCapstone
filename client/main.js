@@ -91,7 +91,7 @@ Template.mapSVG.onRendered(() => {
             name = stripSpaces(this.textContent);
             var stop = findTFLId(name);
             console.log("id:" + stop.id);
-            getInboundArrivals("victoria", stop.id);
+            getArrivals("victoria", stop.id, "inbound");
         });
     });
 
@@ -124,8 +124,8 @@ Template.mapSVG.onRendered(() => {
         });
     }
 
-    function getInboundArrivals(line, tflId) {
-        urlAPI = "https://api.tfl.gov.uk/Line/" + line + "/Arrivals/" + tflId + "?direction=inbound&app_id=&app_key=";
+    function getArrivals(line, tflId, journey) {
+        urlAPI = "https://api.tfl.gov.uk/Line/" + line + "/Arrivals/" + tflId + "?direction=" + journey + "&app_id=&app_key=";
 
         Meteor.http.get(urlAPI, function(error, results) {
 
@@ -145,20 +145,39 @@ Template.mapSVG.onRendered(() => {
                 console.log(Arrivals.find().map(function(doc) {
                     return moment().add(doc.timeToStation, 'seconds').fromNow() || []
                 }));
-                //                     return doc.expectedArrival, doc.timeToStation|| []}));
+                console.log(Arrivals.findOne());
             } else {
                 console.log(error);
             }
         });
 
     }
-
-});
-
-Template.mapSVG.helpers({
-
 });
 
 Template.details.helpers({
-
+// name:function(){
+//     var item = Arrivals.findOne();
+//     // console.log(item.stationName);
+//
+//     return item.stationName;
+// }
 });
+
+// Template.arrivalsList.helpers({
+//     arrivals: function() {
+//             return Arrivals.find();
+//     },
+//     details: function() {
+//         return this._id.expectedArrival;
+//     }
+// })
+// Template.arrivalItem.helpers({
+// details:function(){
+//     var item = Arrivals.findOne();
+//     // console.log(item.stationName);
+//     item.forEach(function(){
+//         console.log("test");
+//     return "item.stationName;"
+// });
+// }
+// });
