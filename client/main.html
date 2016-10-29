@@ -4,9 +4,9 @@
 
 <body>
   <h1>Victoria Line Information Map</h1>
-  <div class="container">
-    {{> details}}
+  <div class="container" id="wrapper">
     {{> mapSVG}}
+    {{> details}}
   </div>
 
 
@@ -22,10 +22,16 @@
 
 <template name="details">
   <div id="details">
-    <!-- <p>
-      {{name}}
+    <p>
+      {{stationame}}
     </p>
-    {{> arrivalsList}}-->
+    <select id="line-select">
+    <option disabled="disabled" selected="selected">Please Select</option>
+    {{#each lines}}
+        <option value="{{this.name}}">{{this.name}}</option>
+    {{/each}}
+</select>
+    <!--{{> arrivalsList}}-->
   </div>
 </template>
 

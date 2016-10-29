@@ -6,14 +6,19 @@ html, body {
     max-height: 100%;
 }
 
+#wrapper {
+    width: 100%;
+    border: 1px solid black;
+    overflow: hidden; /* will contain if #first is longer than #second */
+}
+
 #main {
   min-height: 90%;
   max-height: 90%;
   height: 90%;
   width: 75%;
   float: right;
-  border: 1px;
-  border-style: solid;
+  border: 1px solid red;
   overflow:hidden;
 }
 
@@ -21,20 +26,8 @@ html, body {
   min-height: 90%;
   max-height: 90%;
   height: 90%;
-  float:left;
   width:25%;
-  overflow:hidden;
-}
-
-#left{
-float:left;
-width:75%;
-overflow:hidden;
-}
-#right{
-float:left;
-width:25%;
-overflow:hidden;
+  border: 1px solid green;
 }
 
 #map_container {

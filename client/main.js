@@ -71,8 +71,7 @@ Template.mapSVG.onRendered(() => {
 
         .on("click", function() {
             if (isStation(this.href.baseVal)) {
-                name = stripSpaces(this.id);
-                console.log(findTFLId(name));
+                getStation(this.id);
             }
         });
 
@@ -80,7 +79,6 @@ Template.mapSVG.onRendered(() => {
             .on("mouseover", function() {
                 name = stripSpaces(this.textContent);
                 d3.select(this).style("fill", "#FFA500");
-                // console.log(findTFLId(name));
             })
 
         .on("mouseout", function() {
@@ -88,12 +86,17 @@ Template.mapSVG.onRendered(() => {
         })
 
         .on("click", function() {
-            name = stripSpaces(this.textContent);
-            var stop = findTFLId(name);
-            console.log("id:" + stop.id);
-            getArrivals("victoria", stop.id, "inbound");
+            getStation(this.textContent);
+            // getArrivals("victoria", getStation(this.textContent), "inbound");
         });
     });
+
+    function getStation(idName){
+        name = stripSpaces(idName);
+        var stop = findTFLId(name);
+        Session.set("stationId", stop.id);
+        return stop.id;
+    }
 
     function stripSpaces(str) {
         return str.replace(/\s+/g, '');
@@ -155,13 +158,25 @@ Template.mapSVG.onRendered(() => {
 });
 
 Template.details.helpers({
-// name:function(){
-//     var item = Arrivals.findOne();
-//     // console.log(item.stationName);
-//
-//     return item.stationName;
-// }
+
+stationame:function(){
+    _id = Session.get("stationId");
+    if (_id) {
+         station = Stations.findOne({id: _id});
+         return station.commonName;
+    }
+},
+
+lines:function(){
+    _id = Session.get("stationId");
+    if (_id) {
+         station = Stations.findOne({id: _id});
+         return station.lines;
+    }
+}
 });
+
+
 
 // Template.arrivalsList.helpers({
 //     arrivals: function() {
