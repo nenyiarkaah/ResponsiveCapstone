@@ -87,96 +87,160 @@ Template.mapSVG.onRendered(() => {
 
         .on("click", function() {
             getStation(this.textContent);
-            // getArrivals("victoria", getStation(this.textContent), "inbound");
         });
     });
-
-    function getStation(idName){
-        name = stripSpaces(idName);
-        var stop = findTFLId(name);
-        Session.set("stationId", stop.id);
-        return stop.id;
-    }
-
-    function stripSpaces(str) {
-        return str.replace(/\s+/g, '');
-    }
-
-    function isStation(type) {
-        if (type.replace("#", "") === "intersection") {
-            return true;
-        }
-        return false;
-    }
-
-    function calculateTransformRatio(width, height, svgWidth, svgHeight) {
-        var widthRatio = width / svgWidth;
-        var heightRatio = height / svgHeight;
-        var ratio = 1;
-        if (heightRatio <= widthRatio) {
-            ratio = heightRatio;
-        } else {
-            ratio = widthRatio;
-        }
-        return ratio;
-    }
-
-    function findTFLId(name) {
-        return Stations.findOne({
-            internalName: name
-        });
-    }
-
-    function getArrivals(line, tflId, journey) {
-        urlAPI = "https://api.tfl.gov.uk/Line/" + line + "/Arrivals/" + tflId + "?direction=" + journey + "&app_id=&app_key=";
-
-        Meteor.http.get(urlAPI, function(error, results) {
-
-            if (!error) {
-                var strResult = JSON.stringify(results.data);
-                while (strResult.includes("$")) {
-                    strResult = strResult.replace("$", "base");
-                }
-                var data = JSON.parse(strResult);
-                data.forEach(function(item) {
-
-                    id = Arrivals.insert(item);
-                });
-                console.log(Arrivals.find().map(function(doc) {
-                    return moment().utc(doc.expectedArrival).format('HH:mm:ss') || []
-                }));
-                console.log(Arrivals.find().map(function(doc) {
-                    return moment().add(doc.timeToStation, 'seconds').fromNow() || []
-                }));
-                console.log(Arrivals.findOne());
-            } else {
-                console.log(error);
-            }
-        });
-
-    }
 });
 
 Template.details.helpers({
 
-stationame:function(){
-    _id = Session.get("stationId");
-    if (_id) {
-         station = Stations.findOne({id: _id});
-         return station.commonName;
-    }
-},
+    stationame: function() {
+        _id = Session.get("stationId");
+        if (_id) {
+            station = Stations.findOne({
+                id: _id
+            });
+            return station.commonName;
+        }
+    },
 
-lines:function(){
-    _id = Session.get("stationId");
-    if (_id) {
-         station = Stations.findOne({id: _id});
-         return station.lines;
-    }
-}
+    lines: function() {
+        _id = Session.get("stationId");
+        if (_id) {
+            station = Stations.findOne({
+                id: _id
+            });
+
+            return station.lines;
+        }
+    },
+    zone: function() {
+        _id = Session.get("stationId");
+        if (_id) {
+            station = Stations.findOne({
+                id: _id
+            });
+            var result = extractAddtionalProperty(station, "Zone");
+            return "Zone - " + result;
+        }
+    },
+    night: function() {
+        _id = Session.get("stationId");
+        if (_id) {
+            station = Stations.findOne({
+                id: _id
+            });
+            var result = extractAddtionalProperty(station, "Night");
+            return "Night service - " + result;
+        }
+    },
+    toilet: function() {
+        _id = Session.get("stationId");
+        if (_id) {
+            station = Stations.findOne({
+                id: _id
+            });
+            var result = extractAddtionalProperty(station, "Toilets");
+            return "Toilets - " + result;
+        }
+    },
+    lift: function() {
+        _id = Session.get("stationId");
+        if (_id) {
+            station = Stations.findOne({
+                id: _id
+            });
+            var result = extractAddtionalProperty(station, "Lifts");
+            return "Lifts - " + result;
+        }
+    },
+
+    address: function() {
+        _id = Session.get("stationId");
+        if (_id) {
+            station = Stations.findOne({
+                id: _id
+            });
+            var result = extractAddtionalProperty(station, "Address");
+            return "Address - " + result;
+        }
+    },
 });
 
+function getStation(idName) {
+    name = stripSpaces(idName);
+    var stop = findTFLId(name);
+    Session.set("stationId", stop.id);
+    return stop.id;
+}
 
+function stripSpaces(str) {
+    return str.replace(/\s+/g, '');
+}
+
+function isStation(type) {
+    if (type.replace("#", "") === "intersection") {
+        return true;
+    }
+    return false;
+}
+
+function calculateTransformRatio(width, height, svgWidth, svgHeight) {
+    var widthRatio = width / svgWidth;
+    var heightRatio = height / svgHeight;
+    var ratio = 1;
+    if (heightRatio <= widthRatio) {
+        ratio = heightRatio;
+    } else {
+        ratio = widthRatio;
+    }
+    return ratio;
+}
+
+function findTFLId(name) {
+    return Stations.findOne({
+        internalName: name
+    });
+}
+
+function extractAddtionalProperty(station, key) {
+    return station.additionalProperties.map(function(item) {
+        if (item.key == key) {
+            return item.value;
+        }
+
+    }).filter(function(d) {
+        return d != null;
+    });
+};
+
+function getArrivals(line, tflId, journey) {
+    urlAPI = "https://api.tfl.gov.uk/Line/" + line + "/Arrivals/" + tflId + "?direction=" + journey + "&app_id=&app_key=";
+
+    Meteor.http.get(urlAPI, function(error, results) {
+
+        if (!error) {
+            var strResult = JSON.stringify(results.data);
+            while (strResult.includes("$")) {
+                strResult = strResult.replace("$", "base");
+            }
+            var data = JSON.parse(strResult);
+            data.forEach(function(item) {
+
+                id = Arrivals.insert(item);
+            });
+            console.log(Arrivals.find().map(function(doc) {
+                return moment().utc(doc.expectedArrival).format('HH:mm:ss') || []
+            }));
+            console.log(Arrivals.find().map(function(doc) {
+                return moment().add(doc.timeToStation, 'seconds').fromNow() || []
+            }));
+            console.log(Arrivals.findOne());
+        } else {
+            console.log(error);
+        }
+    });
+
+};
 
 // Template.arrivalsList.helpers({
 //     arrivals: function() {

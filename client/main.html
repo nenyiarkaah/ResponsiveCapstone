@@ -1,13 +1,12 @@
 <head>
-  <title>Capstone Project</title>
+    <title>Capstone Project</title>
 </head>
 
 <body>
-  <h1>Victoria Line Information Map</h1>
-  <div class="container" id="wrapper">
-    {{> mapSVG}}
-    {{> details}}
-  </div>
+    <h1>Victoria Line Information Map</h1>
+    <div class="container" id="wrapper">
+        {{> mapSVG}} {{> details}}
+    </div>
 
 
 </body>
@@ -25,12 +24,24 @@
     <p>
       {{stationame}}
     </p>
+    <p>
+      {{zone}}
+    </p>
+    <p>
+      {{night}}
+    </p>
+    <p>
+      {{toilet}}
+    </p>
+    <p>
+      {{lift}}
+    </p>
     <select id="line-select">
-    <option disabled="disabled" selected="selected">Please Select</option>
-    {{#each lines}}
-        <option value="{{this.name}}">{{this.name}}</option>
-    {{/each}}
-</select>
+      <!-- <option disabled="disabled" selected="selected">Victoria</option> -->
+      {{#each lines}}
+          <option value="{{this.name}}">{{this.name}}</option>
+      {{/each}}
+    </select>
     <!--{{> arrivalsList}}-->
   </div>
 </template>
