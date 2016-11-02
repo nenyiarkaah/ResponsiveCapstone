@@ -45,8 +45,7 @@ Template.mapSVG.onRendered(() => {
                             if (d3.select(this).attr("test") == name) {
                                 return this;
                             }
-                        })
-                        .filter(function(d) {
+                        }).filter(function(d) {
                             return d == null;
                         });
                     stationName.style("fill", "#FFA500");
@@ -93,12 +92,23 @@ Template.mapSVG.onRendered(() => {
 
 Template.details.helpers({
 
+    station: function(){
+        _id = Session.get("stationId");
+        if (_id) {
+            station = Stations.findOne({
+                id: _id
+            });
+            return station;
+        }
+    },
+
     stationame: function() {
         _id = Session.get("stationId");
         if (_id) {
             station = Stations.findOne({
                 id: _id
             });
+            console.log(station);
             return station.commonName;
         }
     },
@@ -109,10 +119,20 @@ Template.details.helpers({
             station = Stations.findOne({
                 id: _id
             });
-
             return station.lines;
         }
     },
+
+    journeys: function(){
+        _id = Session.get("stationId");
+        if (_id) {
+            station = Stations.findOne({
+                id: _id
+            });
+            return station.lines;
+        }
+    },
+
     zone: function() {
         _id = Session.get("stationId");
         if (_id) {
