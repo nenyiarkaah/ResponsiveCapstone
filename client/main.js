@@ -1,8 +1,13 @@
 // Session.set("points", []);
 console.log("I'm running client code");
+// Subscriptions
+Meteor.subscribe("Stations");
+Meteor.subscribe("Lines");
+Meteor.subscribe("Timetables");
 
 Template.mapSVG.onRendered(() => {
     // console.log(Stations);
+    // d3.xml("londonMap.svg", function(error, xml) {
     d3.xml("victoriaMap.svg", function(error, xml) {
         if (error) throw error;
         // "xml" is the XML DOM tree
@@ -42,12 +47,12 @@ Template.mapSVG.onRendered(() => {
                     name = stripSpaces(this.id);
                     // highlight station name
                     stationName = stopNames.select(function() {
-                            if (d3.select(this).attr("test") == name) {
-                                return this;
-                            }
-                        }).filter(function(d) {
-                            return d == null;
-                        });
+                        if (d3.select(this).attr("test") == name) {
+                            return this;
+                        }
+                    }).filter(function(d) {
+                        return d == null;
+                    });
                     stationName.style("fill", "#FFA500");
                 }
             })
@@ -92,7 +97,7 @@ Template.mapSVG.onRendered(() => {
 
 Template.details.helpers({
 
-    station: function(){
+    station: function() {
         _id = Session.get("stationId");
         if (_id) {
             station = Stations.findOne({
@@ -119,17 +124,36 @@ Template.details.helpers({
             station = Stations.findOne({
                 id: _id
             });
+            Session.set("lineName", convertCommonNameToInternal(station.lines[0].id));
+            Session.set("line", [station.lines[0].inbound, station.lines[0].outbound]);
+
             return station.lines;
+
         }
     },
 
-    journeys: function(){
-        _id = Session.get("stationId");
-        if (_id) {
-            station = Stations.findOne({
-                id: _id
+    journeys: function() {
+        line = Session.get("line");
+        if (line) {
+            Session.set("journeyId", 0);
+            return line;
+        }
+    },
+
+    timetable: function() {
+        tflId = Session.get("stationId");
+        directionId = Session.get("journeyId");
+        line = Session.get("lineName");
+        if (tflId && line && isNumber(directionId)) {
+            ReactiveMethod.call('getTimetable', line, tflId, directionId);
+            return Timetables.find({}, {sort: {expectedArrival: 1}}).map(function(doc) {
+                item = {
+                    destination: stripUndergroundStation(doc.destinationName),
+                    expected: moment(doc.expectedArrival).format('HH:mm:ss'),
+                    eta: moment().add(doc.timeToStation, 'seconds').fromNow()
+                }
+                return item;
             });
-            return station.lines;
         }
     },
 
@@ -186,6 +210,52 @@ Template.details.helpers({
     },
 });
 
+Template.details.events({
+    'change #line-select': function(evt) {
+        var newValue = convertCommonNameToInternal($(evt.target).val());
+        _id = Session.get("stationId");
+
+        var oldValue = Session.get("lineName");
+
+        if (newValue != oldValue) {
+            station = Stations.findOne({
+                id: _id
+            });
+            line = station.lines.map((lineitem) => {
+                if (lineitem.id == newValue) {
+                    return lineitem;
+                }
+            }).filter(function(d) {
+                return d != null;
+            });
+            Session.set("line", [line[0].inbound, line[0].outbound]);
+        }
+        Session.set("lineName", newValue);
+    },
+
+    'change #journey-select': function(evt) {
+        allValues = Session.get("line");
+        journeyId = Session.get("journeyId");
+        var newValue = $(evt.target).val();
+        index = allValues.indexOf(newValue);
+        // console.log("index:" + index + " journeyId:" + journeyId);
+        Session.set("journeyId", index);
+
+    }
+});
+
+function isNumber(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+function convertCommonNameToInternal(name) {
+    return name.replace(/\s+/g, '').replace("UndergroundStation", "").replace("&", "-").toLowerCase();
+}
+
+function stripUndergroundStation(name){
+  return name.replace("Underground Station", "");
+}
+
 function getStation(idName) {
     name = stripSpaces(idName);
     var stop = findTFLId(name);
@@ -232,51 +302,3 @@ function extractAddtionalProperty(station, key) {
         return d != null;
     });
 };
-
-function getArrivals(line, tflId, journey) {
-    urlAPI = "https://api.tfl.gov.uk/Line/" + line + "/Arrivals/" + tflId + "?direction=" + journey + "&app_id=&app_key=";
-
-    Meteor.http.get(urlAPI, function(error, results) {
-
-        if (!error) {
-            var strResult = JSON.stringify(results.data);
-            while (strResult.includes("$")) {
-                strResult = strResult.replace("$", "base");
-            }
-            var data = JSON.parse(strResult);
-            data.forEach(function(item) {
-
-                id = Arrivals.insert(item);
-            });
-            console.log(Arrivals.find().map(function(doc) {
-                return moment().utc(doc.expectedArrival).format('HH:mm:ss') || []
-            }));
-            console.log(Arrivals.find().map(function(doc) {
-                return moment().add(doc.timeToStation, 'seconds').fromNow() || []
-            }));
-            console.log(Arrivals.findOne());
-        } else {
-            console.log(error);
-        }
-    });
-
-};
-
-// Template.arrivalsList.helpers({
-//     arrivals: function() {
-//             return Arrivals.find();
-//     },
-//     details: function() {
-//         return this._id.expectedArrival;
-//     }
-// })
-// Template.arrivalItem.helpers({
-// details:function(){
-//     var item = Arrivals.findOne();
-//     // console.log(item.stationName);
-//     item.forEach(function(){
-//         console.log("test");
-//     return "item.stationName;"
-// });
-// }
-// });

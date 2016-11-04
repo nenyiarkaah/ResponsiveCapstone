@@ -37,23 +37,27 @@
       {{lift}}
     </p>
     <select id="line-select">
-      <!-- <option disabled="disabled" selected="selected">Victoria</option> -->
       {{#each lines}}
           <option value="{{this.name}}">{{this.name}}</option>
       {{/each}}
     </select>
-    <!--{{> arrivalsList}}-->
+    <br>
+    <select id="journey-select">
+      {{#each journeys}}
+          <option value="{{this}}">{{this}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div id="timetable">
+      {{#each timetable}}
+        <div class="">{{this.expected}} to {{this.destination}}</div>
+        <div class="">Arrival {{this.eta}}</div>
+      {{/each}}
   </div>
 </template>
 
-<!-- <template name="arrivalsList">
-  <div name="container">
-  </div>
-</template> -->
-
-<!-- <template name="arrivalItem">
+<!-- <template name="arrivalTimetable">
   <div class="container">
-    <p>{{destination}}</p>
-    <hr>
+
   </div>
 </template> -->

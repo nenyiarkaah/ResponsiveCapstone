@@ -1,6 +1,17 @@
 import {
     Meteor
 } from 'meteor/meteor';
+Meteor.publish('Stations', function(){
+    return Stations.find();
+});
+Meteor.publish('Lines', function(){
+    return Lines.find();
+});
+Meteor.publish('Timetables', function(){
+    var currentUserId = this.userId;
+    // { createdBy: currentUserId }
+    return Timetables.find();
+})
 
 Meteor.startup(() => {
     // code to run on server at startup
@@ -82,32 +93,32 @@ function AssignJourney(line) {
             break;
         case "central":
             return {
-                inbound: "South Bound",
-                outbound: "North Bound"
+                inbound: "East Bound",
+                outbound: "West Bound"
             };
             break;
         case "circle":
             return {
-                inbound: "South Bound",
-                outbound: "North Bound"
+                inbound: "East Bound",
+                outbound: "West Bound"
             };
             break;
         case "district":
             return {
-                inbound: "South Bound",
-                outbound: "North Bound"
+                inbound: "East Bound",
+                outbound: "West Bound"
             };
             break;
         case "hammersmith-city":
             return {
-                inbound: "South Bound",
-                outbound: "North Bound"
+                inbound: "East Bound",
+                outbound: "West Bound"
             };
             break;
         case "jubilee":
             return {
-                inbound: "South Bound",
-                outbound: "North Bound"
+                inbound: "East Bound",
+                outbound: "West Bound"
             };
             break;
         case "metropolitan":
@@ -149,4 +160,34 @@ function AssignJourney(line) {
             break;
 
     }
-}
+};
+
+Meteor.methods({
+    getTimetable: function(line, tflId, directionId) {
+
+        var direction;
+        if (directionId == 0) {
+            direction = "inbound";
+        } else {
+            direction = "outbound";
+        }
+        // console.log("tflId:" + tflId + " direction:" + direction + " line:" + line);
+        urlAPI = "https://api.tfl.gov.uk/Line/" + line + "/Arrivals/" + tflId + "?direction=" + direction + "&app_id=&app_key=";
+        Timetables.remove({});
+        Meteor.http.get(urlAPI, function(error, results) {
+
+            if (error) {
+                console.log(error.reason);
+                return;
+            }
+            var strResult = JSON.stringify(results.data);
+            while (strResult.includes("$")) {
+                strResult = strResult.replace("$", "base");
+            }
+            var data = JSON.parse(strResult);
+            data.forEach(function(item) {
+                id = Timetables.insert(item);
+            });
+        });
+    }
+})
